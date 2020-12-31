@@ -8,6 +8,7 @@ import de.mossgrabers.controller.apc.command.continuous.APCPlayPositionCommand;
 import de.mossgrabers.controller.apc.command.continuous.APCTempoCommand;
 import de.mossgrabers.controller.apc.command.trigger.APCBrowserCommand;
 import de.mossgrabers.controller.apc.command.trigger.APCCursorCommand;
+import de.mossgrabers.controller.apc.command.trigger.APCMetronomeCommand;
 import de.mossgrabers.controller.apc.command.trigger.APCQuantizeCommand;
 import de.mossgrabers.controller.apc.command.trigger.APCRecordCommand;
 import de.mossgrabers.controller.apc.command.trigger.APCStopClipCommand;
@@ -49,7 +50,6 @@ import de.mossgrabers.framework.command.trigger.track.MasterCommand;
 import de.mossgrabers.framework.command.trigger.track.MuteCommand;
 import de.mossgrabers.framework.command.trigger.track.RecArmCommand;
 import de.mossgrabers.framework.command.trigger.track.SoloCommand;
-import de.mossgrabers.framework.command.trigger.transport.MetronomeCommand;
 import de.mossgrabers.framework.command.trigger.transport.PlayCommand;
 import de.mossgrabers.framework.command.trigger.transport.StopCommand;
 import de.mossgrabers.framework.command.trigger.view.ToggleShiftViewCommand;
@@ -281,7 +281,7 @@ public class APCControllerSetup extends AbstractControllerSetup<APCControlSurfac
         }
 
         this.addButton (ButtonID.CLIP, this.isMkII ? "SESSION" : "MIDI OVERDUB", new SessionRecordCommand (this.model, surface), this.isMkII ? APCControlSurface.APC_BUTTON_SESSION : APCControlSurface.APC_BUTTON_MIDI_OVERDUB, t::isLauncherOverdub, ColorManager.BUTTON_STATE_OFF, ColorManager.BUTTON_STATE_ON);
-        this.addButton (ButtonID.METRONOME, "METRONOME", new MetronomeCommand<> (this.model, surface), this.isMkII ? APCControlSurface.APC_BUTTON_SEND_C : APCControlSurface.APC_BUTTON_METRONOME, t::isMetronomeOn, ColorManager.BUTTON_STATE_OFF, ColorManager.BUTTON_STATE_ON);
+        this.addButton (ButtonID.METRONOME, "METRONOME", new APCMetronomeCommand (this.model, surface), this.isMkII ? APCControlSurface.APC_BUTTON_SEND_C : APCControlSurface.APC_BUTTON_METRONOME, t::isMetronomeOn, ColorManager.BUTTON_STATE_OFF, ColorManager.BUTTON_STATE_ON);
         this.addButton (ButtonID.NUDGE_PLUS, "NUDGE+", new RedoCommand<> (this.model, surface), this.isMkII ? APCControlSurface.APC_BUTTON_NUDGE_MINUS : APCControlSurface.APC_BUTTON_NUDGE_PLUS);
         this.addButton (ButtonID.NUDGE_MINUS, "NUDGE-", new UndoCommand<> (this.model, surface), this.isMkII ? APCControlSurface.APC_BUTTON_NUDGE_PLUS : APCControlSurface.APC_BUTTON_NUDGE_MINUS);
         this.addButton (ButtonID.DEVICE_ON_OFF, "DEV. ON/OFF", new DeviceOnOffCommand<> (this.model, surface), this.isMkII ? APCControlSurface.APC_BUTTON_DETAIL_VIEW : APCControlSurface.APC_BUTTON_DEVICE_ON_OFF, this.model.getCursorDevice ()::isEnabled, ColorManager.BUTTON_STATE_OFF, ColorManager.BUTTON_STATE_ON);

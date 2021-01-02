@@ -9,6 +9,7 @@ import de.mossgrabers.controller.apc.controller.APCControlSurface;
 import de.mossgrabers.controller.apc.mode.NoteMode;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.color.ColorManager;
+import de.mossgrabers.framework.controller.hardware.IHwButton;
 import de.mossgrabers.framework.daw.DAWColor;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.INoteClip;
@@ -27,6 +28,9 @@ import de.mossgrabers.framework.view.AbstractDrumView;
  */
 public class DrumView extends AbstractDrumView<APCControlSurface, APCConfiguration>
 {
+
+    private boolean[] editedSteps;
+
     /**
      * Constructor.
      *
@@ -36,6 +40,13 @@ public class DrumView extends AbstractDrumView<APCControlSurface, APCConfigurati
     public DrumView (final APCControlSurface surface, final IModel model)
     {
         super ("Drum", surface, model, 2, 3, surface.isMkII ());
+        this.editedSteps = new boolean[128];
+    }
+
+
+    public void setStepEdited (final int index)
+    {
+        this.editedSteps[index] = true;
     }
 
 
@@ -47,21 +58,28 @@ public class DrumView extends AbstractDrumView<APCControlSurface, APCConfigurati
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
+        final INoteClip cursorClip = this.getClip ();
+        final int channel = this.configuration.getMidiEditChannel ();
+        final int step = this.numColumns * (this.allRows - 1 - y) + x;
+        final int note = offsetY + this.selectedPad;
+        final int adjustedVelocity = this.configuration.isAccentActive () ? this.configuration.getFixedAccentValue () : this.surface.getButton (ButtonID.get (ButtonID.PAD1, index)).getPressedVelocity ();
+
+        if (this.handleSequencerAreaButtonCombinations (cursorClip, channel, step, note, adjustedVelocity))
+            return;
+
+        final int state = cursorClip.getStep (channel, step, note).getState ();
 
         if (velocity > 0)
         {
-            // Turn on Note mode if an existing note is pressed
-            final INoteClip cursorClip = this.getClip ();
-            final int channel = this.configuration.getMidiEditChannel ();
-            final int step = this.numColumns * (this.allRows - 1 - y) + x;
-            final int note = offsetY + this.selectedPad;
-            final int state = cursorClip.getStep (channel, step, note).getState ();
-            if (state == IStepInfo.NOTE_START)
+            if (state != IStepInfo.NOTE_START)
             {
-                final NoteMode noteMode = (NoteMode) modeManager.get (Modes.NOTE);
-                noteMode.setValues (cursorClip, channel, step, note);
-                modeManager.setActive (Modes.NOTE);
+                cursorClip.toggleStep (channel, step, note, adjustedVelocity);
+                this.editedSteps[step] = true;
             }
+
+            final NoteMode noteMode = (NoteMode) modeManager.get (Modes.NOTE);
+            noteMode.setValues (cursorClip, channel, step, note);
+            modeManager.setActive (Modes.NOTE);
         }
         else
         {
@@ -69,14 +87,44 @@ public class DrumView extends AbstractDrumView<APCControlSurface, APCConfigurati
             if (modeManager.isActive (Modes.NOTE))
                 modeManager.restore ();
 
-            if (this.isNoteEdited)
+            if (this.editedSteps[step])
             {
-                this.isNoteEdited = false;
+                this.editedSteps[step] = false;
                 return;
+            }
+            else
+            {
+                if (state == IStepInfo.NOTE_START)
+                    cursorClip.toggleStep (channel, step, note, adjustedVelocity);
             }
         }
 
-        super.handleSequencerArea (index, x, y, offsetY, velocity);
+        // super.handleSequencerArea (index, x, y, offsetY, velocity);
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    protected boolean handleSequencerAreaButtonCombinations (final INoteClip clip, final int channel, final int step, final int note, final int velocity)
+    {
+        // This is copy and pasted from the superclass. However, the logic for changing
+        // or creating a step with an alternate note length by pressing multiple pads
+        // has been removed.
+
+        // Handle note duplicate function
+        final IHwButton duplicateButton = this.surface.getButton (ButtonID.DUPLICATE);
+        if (duplicateButton != null && duplicateButton.isPressed ())
+        {
+            duplicateButton.setConsumed ();
+            final IStepInfo noteStep = clip.getStep (channel, step, note);
+            if (noteStep.getState () == IStepInfo.NOTE_START)
+                this.copyNote = noteStep;
+            else if (this.copyNote != null)
+                clip.setStep (channel, step, note, this.copyNote);
+            return true;
+        }
+
+        return false;
     }
 
 

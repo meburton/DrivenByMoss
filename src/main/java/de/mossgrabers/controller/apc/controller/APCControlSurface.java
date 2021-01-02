@@ -171,11 +171,12 @@ public class APCControlSurface extends AbstractControlSurface<APCConfiguration>
         if (this.knobCache[knob] == value)
             return;
         this.knobCache[knob] = value;
+
         this.scheduleTask ( () -> {
 
             if (this.knobCache[knob] == value)
                 this.output.sendCC (knob, value);
 
-        }, 100);
+        }, 50);
     }
 }

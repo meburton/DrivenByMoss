@@ -71,7 +71,7 @@ public class DrumView extends AbstractDrumView<APCControlSurface, APCConfigurati
 
         if (velocity > 0)
         {
-            if (state != IStepInfo.NOTE_START)
+            if (state == IStepInfo.NOTE_OFF)
             {
                 cursorClip.toggleStep (channel, step, note, adjustedVelocity);
                 this.editedSteps[step] = true;
@@ -92,14 +92,11 @@ public class DrumView extends AbstractDrumView<APCControlSurface, APCConfigurati
                 this.editedSteps[step] = false;
                 return;
             }
-            else
+            else if (state == IStepInfo.NOTE_START)
             {
-                if (state == IStepInfo.NOTE_START)
-                    cursorClip.toggleStep (channel, step, note, adjustedVelocity);
+                cursorClip.toggleStep (channel, step, note, adjustedVelocity);
             }
         }
-
-        // super.handleSequencerArea (index, x, y, offsetY, velocity);
     }
 
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.beatstep.view;
@@ -89,13 +89,17 @@ public class BrowserView extends AbstractView<BeatstepControlSurface, BeatstepCo
     @Override
     public void onGridNote (final int note, final int velocity)
     {
+        final IBrowser browser = this.model.getBrowser ();
+        if (!browser.isActive ())
+            return;
+
         switch (note - 36)
         {
             // Cancel
             case 0:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (false);
+                browser.stopBrowsing (false);
                 this.surface.getViewManager ().restore ();
                 break;
 
@@ -103,7 +107,7 @@ public class BrowserView extends AbstractView<BeatstepControlSurface, BeatstepCo
             case 7:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (true);
+                browser.stopBrowsing (true);
                 this.surface.getViewManager ().restore ();
                 break;
 

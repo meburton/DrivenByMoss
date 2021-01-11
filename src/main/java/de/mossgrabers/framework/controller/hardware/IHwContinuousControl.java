@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.controller.hardware;
@@ -117,7 +117,7 @@ public interface IHwContinuousControl extends IHwInputControl
     /**
      * Directly bind a parameter to a continuous control.
      *
-     * @param parameter THe parameter to bind
+     * @param parameter The parameter to bind
      */
     void bind (IParameter parameter);
 

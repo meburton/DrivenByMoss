@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw.data;
@@ -69,7 +69,7 @@ public class EqualizerDeviceImpl extends SpecificDeviceImpl implements IEqualize
      */
     public EqualizerDeviceImpl (final IHost host, final IValueChanger valueChanger, final Device device)
     {
-        super (host, valueChanger, device, 0, 0, 0, 0, 0);
+        super (host, valueChanger, device, 0, 0, 0, 0, 0, 0);
 
         final SpecificBitwigDevice eqDevice = device.createSpecificBitwigDevice (ID_BITWIG_EQ_PLUS);
 

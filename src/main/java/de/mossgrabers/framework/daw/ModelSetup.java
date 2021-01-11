@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.daw;
@@ -31,6 +31,7 @@ public class ModelSetup
     private int                  numDevicesInBank       = 8;
     private int                  numDeviceLayers        = 8;
 
+    private int                  numParamPages          = 8;
     private int                  numParams              = 8;
     private int                  numDrumPadLayers       = 16;
 
@@ -172,6 +173,28 @@ public class ModelSetup
     public void setNumSends (final int numSends)
     {
         this.numSends = numSends;
+    }
+
+
+    /**
+     * Get the number of parameter pages of a device to monitor.
+     *
+     * @return The number of parameter pages of a device to monitor
+     */
+    public int getNumParamPages ()
+    {
+        return this.numParamPages;
+    }
+
+
+    /**
+     * Set the number of parameter pages of a device to monitor.
+     *
+     * @param numParamPages The number of parameter pages of a device to monitor
+     */
+    public void setNumParamPages (final int numParamPages)
+    {
+        this.numParamPages = numParamPages;
     }
 
 

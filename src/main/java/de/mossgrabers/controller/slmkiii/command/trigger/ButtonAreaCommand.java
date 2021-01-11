@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.slmkiii.command.trigger;
@@ -31,7 +31,7 @@ public class ButtonAreaCommand extends AbstractTriggerCommand<SLMkIIIControlSurf
      * Constructor.
      *
      * @param row The row of the button (0 or 1)
-     * @param column The column of the buttopn (0-7)
+     * @param column The column of the button (0-7)
      * @param model The model
      * @param surface The surface
      */

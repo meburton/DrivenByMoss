@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad.view;
@@ -99,7 +99,7 @@ public class BrowserView extends AbstractView<LaunchpadControlSurface, Launchpad
             case 36:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (false);
+                browser.stopBrowsing (false);
                 this.surface.getViewManager ().restore ();
                 break;
 
@@ -107,7 +107,7 @@ public class BrowserView extends AbstractView<LaunchpadControlSurface, Launchpad
             case 43:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (true);
+                browser.stopBrowsing (true);
                 this.surface.getViewManager ().restore ();
                 break;
 

@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.kontrol.mki.mode.track;
@@ -47,21 +47,9 @@ public class VolumeMode extends AbstractKontrol1Mode
         final Kontrol1Display d = (Kontrol1Display) this.surface.getDisplay ();
 
         d.clear ();
+        d.setCell (0, 0, this.model.isEffectTrackBankActive () ? "VOL-FX" : "VOLUME").setCell (1, 0, this.formatPageRange ("%d - %d"));
 
         final ITrackBank tb = this.model.getCurrentTrackBank ();
-
-        final StringBuilder sb = new StringBuilder ();
-        final int positionFirst = tb.getScrollPosition ();
-        if (positionFirst >= 0)
-        {
-            sb.append (Integer.toString (positionFirst + 1));
-            final int positionLast = tb.getPositionOfLastItem ();
-            if (positionLast >= 0)
-                sb.append (" - ").append (Integer.toString (positionLast + 1));
-        }
-
-        d.setCell (0, 0, this.model.isEffectTrackBankActive () ? "VOL-FX" : "VOLUME").setCell (1, 0, sb.toString ());
-
         final ITrack selTrack = tb.getSelectedItem ();
 
         final int selIndex = selTrack == null ? -1 : selTrack.getIndex ();

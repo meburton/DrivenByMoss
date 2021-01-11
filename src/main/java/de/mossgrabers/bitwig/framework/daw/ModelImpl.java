@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.framework.daw;
@@ -84,7 +84,7 @@ public class ModelImpl extends AbstractModel
         this.rootTrackGroup = proj.getRootTrackGroup ();
         this.project = new ProjectImpl (this.valueChanger, proj, app);
 
-        this.transport = new TransportImpl (controllerHost, this.valueChanger);
+        this.transport = new TransportImpl (controllerHost, this.application, this.valueChanger);
         final Arranger bwArranger = controllerHost.createArranger ();
         this.arranger = new ArrangerImpl (bwArranger);
         final int numMarkers = modelSetup.getNumMarkers ();
@@ -129,13 +129,14 @@ public class ModelImpl extends AbstractModel
         // Create devices
 
         final int numDevicesInBank = this.modelSetup.getNumDevicesInBank ();
+        final int numParamPages = this.modelSetup.getNumParamPages ();
         final int numParams = this.modelSetup.getNumParams ();
         final int numDeviceLayers = this.modelSetup.getNumDeviceLayers ();
         final int numDrumPadLayers = this.modelSetup.getNumDrumPadLayers ();
 
         // Cursor device
         final PinnableCursorDevice mainCursorDevice = this.bwCursorTrack.createCursorDevice ("CURSOR_DEVICE", "Cursor device", numSends, CursorDeviceFollowMode.FOLLOW_SELECTION);
-        this.cursorDevice = new CursorDeviceImpl (this.host, this.valueChanger, mainCursorDevice, numSends, numParams, numDevicesInBank, numDeviceLayers, numDrumPadLayers);
+        this.cursorDevice = new CursorDeviceImpl (this.host, this.valueChanger, mainCursorDevice, numSends, numParamPages, numParams, numDevicesInBank, numDeviceLayers, numDrumPadLayers);
 
         // Drum Machine
         if (modelSetup.wantsDrumDevice ())
@@ -144,11 +145,11 @@ public class ModelImpl extends AbstractModel
             final DeviceBank drumDeviceBank = this.bwCursorTrack.createDeviceBank (1);
             drumDeviceBank.setDeviceMatcher (drumMachineDeviceMatcher);
             final Device drumMachineDevice = drumDeviceBank.getItemAt (0);
-            this.drumDevice = new DrumDeviceImpl (this.host, this.valueChanger, drumMachineDevice, numSends, numParams, numDevicesInBank, numDeviceLayers, numDrumPadLayers);
+            this.drumDevice = new DrumDeviceImpl (this.host, this.valueChanger, drumMachineDevice, numSends, numParamPages, numParams, numDevicesInBank, numDeviceLayers, numDrumPadLayers);
 
             // Drum Machine 64 pads
             if (modelSetup.wantsDrum64Device ())
-                this.drumDevice64 = new DrumDeviceImpl (this.host, this.valueChanger, drumMachineDevice, 0, 0, -1, 64, 64);
+                this.drumDevice64 = new DrumDeviceImpl (this.host, this.valueChanger, drumMachineDevice, 0, 0, 0, -1, 64, 64);
         }
 
         for (final DeviceID deviceID: modelSetup.getDeviceIDs ())
@@ -186,7 +187,7 @@ public class ModelImpl extends AbstractModel
                     specificDevice = new EqualizerDeviceImpl (this.host, this.valueChanger, device);
                     break;
                 default:
-                    specificDevice = new SpecificDeviceImpl (this.host, this.valueChanger, device, numSends, numParams, numDevicesInBank, numDeviceLayers, numDrumPadLayers);
+                    specificDevice = new SpecificDeviceImpl (this.host, this.valueChanger, device, numSends, numParamPages, numParams, numDevicesInBank, numDeviceLayers, numDrumPadLayers);
                     break;
             }
 

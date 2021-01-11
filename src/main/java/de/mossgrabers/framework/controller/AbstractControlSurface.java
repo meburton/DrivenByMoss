@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.controller;
@@ -624,22 +624,6 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
 
     /** {@inheritDoc} */
     @Override
-    public void setTrigger (final int cc, final String colorID)
-    {
-        this.setTrigger (cc, this.colorManager.getColorIndex (colorID));
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
-    public void setTrigger (final int channel, final int cc, final String colorID)
-    {
-        this.setTrigger (channel, cc, this.colorManager.getColorIndex (colorID));
-    }
-
-
-    /** {@inheritDoc} */
-    @Override
     public void setTrigger (final int channel, final int cc, final int state)
     {
         // Overwrite to support trigger LEDs
@@ -687,6 +671,29 @@ public abstract class AbstractControlSurface<C extends Configuration> implements
             this.updateCounter++;
             this.scheduleTask (this::flushHandler, 1);
         }
+    }
+
+
+    /** {@inheritDoc} */
+    @Override
+    public void forceFlush ()
+    {
+        // Flush all text displays. No need for graphics displays since they are refreshed anyway on
+        // an interval
+        this.textDisplays.forEach (ITextDisplay::forceFlush);
+
+        // Refresh all button LEDs, includes pad grid
+        this.buttons.forEach ( (id, button) -> {
+            final IHwLight light = button.getLight ();
+            if (light != null)
+                light.forceFlush ();
+        });
+
+        // Flush additional lights which are not assigned to a button
+        this.lights.forEach ( (outputID, light) -> light.forceFlush ());
+
+        if (this.lightGuide != null)
+            this.lightGuide.forceFlush ();
     }
 
 

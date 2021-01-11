@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.bitwig.controller.launchkey;
@@ -8,8 +8,8 @@ import de.mossgrabers.bitwig.framework.BitwigSetupFactory;
 import de.mossgrabers.bitwig.framework.configuration.SettingsUIImpl;
 import de.mossgrabers.bitwig.framework.daw.HostImpl;
 import de.mossgrabers.bitwig.framework.extension.AbstractControllerExtensionDefinition;
-import de.mossgrabers.controller.launchkey.LaunchkeyMiniMk3ControllerDefinition;
-import de.mossgrabers.controller.launchkey.LaunchkeyMiniMk3ControllerSetup;
+import de.mossgrabers.controller.launchkey.mini.LaunchkeyMiniMk3ControllerDefinition;
+import de.mossgrabers.controller.launchkey.mini.LaunchkeyMiniMk3ControllerSetup;
 import de.mossgrabers.framework.controller.IControllerSetup;
 
 import com.bitwig.extension.controller.api.ControllerHost;

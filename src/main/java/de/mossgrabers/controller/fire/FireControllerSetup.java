@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.fire;
@@ -233,7 +233,7 @@ public class FireControllerSetup extends AbstractControllerSetup<FireControlSurf
 
         }, ColorManager.BUTTON_STATE_ON, ColorManager.BUTTON_STATE_HI, FireColorManager.BUTTON_STATE_ON2, FireColorManager.BUTTON_STATE_HI2);
 
-        this.addButton (ButtonID.METRONOME, "PATTERN/\nSONG", new MetronomeCommand<> (this.model, surface), FireControlSurface.FIRE_PATTERN, () -> {
+        this.addButton (ButtonID.METRONOME, "PATTERN/\nSONG", new MetronomeCommand<> (this.model, surface, false), FireControlSurface.FIRE_PATTERN, () -> {
 
             if (surface.isShiftPressed ())
                 return t.isMetronomeTicksOn ();

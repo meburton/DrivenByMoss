@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.apcmini.view;
@@ -93,7 +93,7 @@ public class BrowserView extends AbstractView<APCminiControlSurface, APCminiConf
             case 0:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (false);
+                browser.stopBrowsing (false);
                 viewManager.restore ();
                 break;
 
@@ -101,7 +101,7 @@ public class BrowserView extends AbstractView<APCminiControlSurface, APCminiConf
             case 7:
                 if (velocity == 0)
                     return;
-                this.model.getBrowser ().stopBrowsing (true);
+                browser.stopBrowsing (true);
                 viewManager.restore ();
                 break;
 

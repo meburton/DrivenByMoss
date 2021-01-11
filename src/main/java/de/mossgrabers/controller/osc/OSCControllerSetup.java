@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.osc;
@@ -104,6 +104,7 @@ public class OSCControllerSetup extends AbstractControllerSetup<IControlSurface<
         ms.setNumSends (bankPageSize);
         ms.setNumDevicesInBank (bankPageSize);
         ms.setNumDeviceLayers (bankPageSize);
+        ms.setNumParamPages (bankPageSize);
         ms.setNumParams (bankPageSize);
         ms.setNumUserPageSize (bankPageSize);
         ms.setNumMarkers (bankPageSize);

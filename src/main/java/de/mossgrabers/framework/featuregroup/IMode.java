@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.featuregroup;
@@ -165,4 +165,14 @@ public interface IMode extends IFeatureGroup
      * @return True if there is an item
      */
     boolean hasNextItemPage ();
+
+
+    /**
+     * Formats the position range of the currently active page of the bank. If no bank is set or
+     * there is no page an empty string is returned.
+     *
+     * @param format The format to use (e.g. "%d - %d")
+     * @return The formatted range
+     */
+    String formatPageRange (final String format);
 }

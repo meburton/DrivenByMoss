@@ -1,10 +1,9 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.launchpad;
 
-import de.mossgrabers.controller.launchpad.command.trigger.ClickCommand;
 import de.mossgrabers.controller.launchpad.command.trigger.DeleteCommand;
 import de.mossgrabers.controller.launchpad.command.trigger.LaunchpadCursorCommand;
 import de.mossgrabers.controller.launchpad.command.trigger.LaunchpadDuplicateCommand;
@@ -34,6 +33,7 @@ import de.mossgrabers.controller.launchpad.mode.SendMode;
 import de.mossgrabers.controller.launchpad.mode.StopClipMode;
 import de.mossgrabers.controller.launchpad.mode.TrackMode;
 import de.mossgrabers.controller.launchpad.view.BrowserView;
+import de.mossgrabers.controller.launchpad.view.ChordsView;
 import de.mossgrabers.controller.launchpad.view.DeviceView;
 import de.mossgrabers.controller.launchpad.view.Drum4View;
 import de.mossgrabers.controller.launchpad.view.Drum64View;
@@ -56,8 +56,10 @@ import de.mossgrabers.controller.launchpad.view.UserView;
 import de.mossgrabers.controller.launchpad.view.VolumeView;
 import de.mossgrabers.framework.command.aftertouch.AftertouchAbstractViewCommand;
 import de.mossgrabers.framework.command.trigger.application.UndoCommand;
+import de.mossgrabers.framework.command.trigger.clip.NewCommand;
 import de.mossgrabers.framework.command.trigger.clip.QuantizeCommand;
 import de.mossgrabers.framework.command.trigger.mode.ModeCursorCommand.Direction;
+import de.mossgrabers.framework.command.trigger.transport.MetronomeCommand;
 import de.mossgrabers.framework.command.trigger.transport.RecordCommand;
 import de.mossgrabers.framework.command.trigger.view.SelectPlayViewCommand;
 import de.mossgrabers.framework.command.trigger.view.ViewButtonCommand;
@@ -133,6 +135,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
     private static final Views []                ALL_PLAY_VIEWS  =
     {
         Views.PLAY,
+        Views.CHORDS,
         Views.PIANO,
         Views.DRUM64,
         Views.SEQUENCER,
@@ -229,6 +232,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
         viewManager.register (Views.DRUM8, new Drum8View (surface, this.model));
         viewManager.register (Views.DRUM64, new Drum64View (surface, this.model));
         viewManager.register (Views.PLAY, new PlayView (surface, this.model));
+        viewManager.register (Views.CHORDS, new ChordsView (surface, this.model));
         viewManager.register (Views.PIANO, new PianoView (surface, this.model));
         viewManager.register (Views.RAINDROPS, new RaindropsView (surface, this.model));
         viewManager.register (Views.SEQUENCER, new SequencerView (surface, this.model));
@@ -260,7 +264,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
 
         surface.getViewManager ().addChangeListener ( (previousViewId, activeViewId) -> {
 
-            surface.getLight (OutputID.LED1).clearCache ();
+            surface.getLight (OutputID.LED1).forceFlush ();
             this.updateIndication ();
 
         });
@@ -317,7 +321,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
         // The following buttons are only available on the Pro but the commands are used by all
         // Launchpad models!
         final LaunchpadButtonInfo clickInfo = buttonSetup.get (LaunchpadButton.CLICK);
-        this.addButton (ButtonID.METRONOME, "Metronome", new ClickCommand (this.model, surface), clickInfo.isShifted () ? -1 : clickInfo.getControl (), () -> {
+        this.addButton (ButtonID.METRONOME, "Metronome", new MetronomeCommand<> (this.model, surface, true), clickInfo.isShifted () ? -1 : clickInfo.getControl (), () -> {
             if (surface.isShiftPressed ())
                 return surface.isPressed (ButtonID.METRONOME) ? LaunchpadColorManager.LAUNCHPAD_COLOR_WHITE : LaunchpadColorManager.LAUNCHPAD_COLOR_GREEN_SPRING;
             return transport.isMetronomeOn () ? LaunchpadColorManager.LAUNCHPAD_COLOR_GREEN_HI : LaunchpadColorManager.LAUNCHPAD_COLOR_GREEN_LO;
@@ -365,6 +369,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
             this.addButton (ButtonID.NOTE, "Note", new SelectPlayViewCommand<> (this.model, surface, true, PLAY_VIEWS, ALL_PLAY_VIEWS), buttonSetup.get (LaunchpadButton.NOTE).getControl (), () -> this.getViewStateColor (LaunchpadColorManager.LAUNCHPAD_COLOR_AMBER_HI, PLAY_VIEWS));
             this.addButton (ButtonID.DRUM, "Drum Seq", new SelectPlayViewCommand<> (this.model, surface, true, DRUM_VIEWS, ALL_PLAY_VIEWS), 95, () -> this.getViewStateColor (LaunchpadColorManager.LAUNCHPAD_COLOR_OCEAN_HI, DRUM_VIEWS));
             this.addButton (ButtonID.SEQUENCER, "Sequencer", new SelectPlayViewCommand<> (this.model, surface, true, SEQUENCER_VIEWS, ALL_PLAY_VIEWS), 97, () -> this.getViewStateColor (LaunchpadColorManager.LAUNCHPAD_COLOR_YELLOW_HI, SEQUENCER_VIEWS));
+            this.addButton (ButtonID.NEW, "New", new NewCommand<> (this.model, surface), LaunchpadControlSurface.PRO3_LAUNCHPAD_FIXED_LENGTH, () -> surface.isPressed (ButtonID.NEW) ? LaunchpadColorManager.LAUNCHPAD_COLOR_AMBER_HI : LaunchpadColorManager.LAUNCHPAD_COLOR_AMBER_LO);
         }
         else
             this.addButton (ButtonID.NOTE, "Note", new SelectNoteViewCommand (this.model, surface), buttonSetup.get (LaunchpadButton.NOTE).getControl (), this::getNoteStateColor);
@@ -388,7 +393,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
                 entry.getValue ().addEventHandler (ButtonEvent.UP, event -> {
                     final IHwLight light = surface.getButton (key).getLight ();
                     if (light != null)
-                        light.clearCache ();
+                        light.forceFlush ();
                 });
             }
         }
@@ -692,6 +697,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
                 surface.getButton (ButtonID.DOWN).setBounds (41.0, 150.75, 61.0, 60.0);
                 surface.getButton (ButtonID.DELETE).setBounds (41.0, 226.75, 61.0, 60.0);
                 surface.getButton (ButtonID.DUPLICATE).setBounds (41.0, 299.75, 61.0, 60.0);
+                surface.getButton (ButtonID.NEW).setBounds (41.0, 450.5, 61.0, 60.0);
 
                 surface.getButton (ButtonID.REC_ARM).setBounds (113.25, 698.0, 61.0, 30.0);
                 surface.getButton (ButtonID.MUTE).setBounds (188.5, 698.0, 61.0, 30.0);
@@ -862,6 +868,7 @@ public class LaunchpadControllerSetup extends AbstractControllerSetup<LaunchpadC
                 return LaunchpadColorManager.LAUNCHPAD_COLOR_LIME;
 
             case PLAY:
+            case CHORDS:
             case PIANO:
             case DRUM64:
                 return LaunchpadColorManager.LAUNCHPAD_COLOR_AMBER;

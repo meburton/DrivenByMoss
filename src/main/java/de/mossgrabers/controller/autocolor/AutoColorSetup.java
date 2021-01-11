@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.controller.autocolor;
@@ -79,6 +79,7 @@ public class AutoColorSetup extends AbstractControllerSetup<IControlSurface<Auto
         ms.setNumDrumPadLayers (0);
         ms.setNumFilterColumnEntries (0);
         ms.setNumMarkers (0);
+        ms.setNumParamPages (0);
         ms.setNumParams (0);
         ms.setNumResults (0);
         ms.setNumScenes (0);

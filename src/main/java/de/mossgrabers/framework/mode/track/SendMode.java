@@ -1,5 +1,5 @@
 // Written by Jürgen Moßgraber - mossgrabers.de
-// (c) 2017-2020
+// (c) 2017-2021
 // Licensed under LGPLv3 - http://www.gnu.org/licenses/lgpl-3.0.txt
 
 package de.mossgrabers.framework.mode.track;
@@ -14,11 +14,12 @@ import de.mossgrabers.framework.daw.data.ITrack;
 import de.mossgrabers.framework.parameterprovider.SendParameterProvider;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 
 /**
- * Mode for editing Send volumes. The knobs control the volumes of the given send on the selected
- * track.
+ * Mode for editing Send volumes. The knobs control the volumes of the given send of the tracks on
+ * the selected track page or the sends of the selected track if the sendIndex is negative.
  *
  * @param <S> The type of the control surface
  * @param <C> The type of the configuration
@@ -33,7 +34,7 @@ public class SendMode<S extends IControlSurface<C>, C extends Configuration> ext
     /**
      * Constructor.
      *
-     * @param sendIndex The send index
+     * @param sendIndex The send index, if negative the sends of the selected track are edited
      * @param surface The control surface
      * @param model The model
      * @param isAbsolute If true the value change is happending with a setter otherwise relative
@@ -57,7 +58,25 @@ public class SendMode<S extends IControlSurface<C>, C extends Configuration> ext
      */
     public SendMode (final int sendIndex, final S surface, final IModel model, final boolean isAbsolute, final List<ContinuousID> controls)
     {
-        super ("Send", surface, model, isAbsolute, controls);
+        this (sendIndex, surface, model, isAbsolute, controls, surface::isShiftPressed);
+    }
+
+
+    /**
+     * Constructor.
+     *
+     * @param sendIndex The send index
+     * @param surface The control surface
+     * @param model The model
+     * @param isAbsolute If true the value change is happending with a setter otherwise relative
+     *            change method is used
+     * @param controls The IDs of the knobs or faders to control this mode
+     * @param isAlternativeFunction Callback function to execute the secondary function, e.g. a
+     *            shift button
+     */
+    public SendMode (final int sendIndex, final S surface, final IModel model, final boolean isAbsolute, final List<ContinuousID> controls, final BooleanSupplier isAlternativeFunction)
+    {
+        super ("Send", surface, model, isAbsolute, controls, isAlternativeFunction);
 
         this.sendIndex = sendIndex;
 

@@ -6,6 +6,7 @@ package de.mossgrabers.controller.apc.mode;
 
 import de.mossgrabers.controller.apc.controller.APCControlSurface;
 import de.mossgrabers.controller.apc.view.DrumView;
+import de.mossgrabers.controller.apc.view.SequencerView;
 import de.mossgrabers.framework.controller.display.IDisplay;
 import de.mossgrabers.framework.controller.valuechanger.IValueChanger;
 import de.mossgrabers.framework.daw.IHost;
@@ -149,7 +150,9 @@ public class NoteMode extends BaseMode
         // Note was modified, prevent deletion of note on button up
         final IView activeView = this.surface.getViewManager ().getActive ();
         if (activeView instanceof DrumView)
-            DrumView.class.cast (activeView).setStepEdited(step);
+            DrumView.class.cast (activeView).setStepEdited (step);
+        else if (activeView instanceof SequencerView)
+            SequencerView.class.cast (activeView).setStepEdited (step);
     }
 
 

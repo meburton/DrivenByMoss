@@ -9,6 +9,8 @@ import de.mossgrabers.controller.apc.controller.APCControlSurface;
 import de.mossgrabers.controller.apc.mode.NoteMode;
 import de.mossgrabers.framework.controller.ButtonID;
 import de.mossgrabers.framework.controller.color.ColorManager;
+import de.mossgrabers.framework.controller.hardware.IHwButton;
+import de.mossgrabers.framework.daw.constants.Resolution;
 import de.mossgrabers.framework.daw.IModel;
 import de.mossgrabers.framework.daw.INoteClip;
 import de.mossgrabers.framework.daw.IStepInfo;
@@ -25,6 +27,9 @@ import de.mossgrabers.framework.view.AbstractNoteSequencerView;
  */
 public class SequencerView extends AbstractNoteSequencerView<APCControlSurface, APCConfiguration>
 {
+
+    private boolean[] editedSteps = new boolean[128];
+
     /**
      * Constructor.
      *
@@ -48,20 +53,27 @@ public class SequencerView extends AbstractNoteSequencerView<APCControlSurface, 
             return;
 
         final ModeManager modeManager = this.surface.getModeManager ();
+        final INoteClip cursorClip = this.getClip ();
+        final int mappedNote = this.keyManager.map (y);
+        final int editMidiChannel = this.configuration.getMidiEditChannel ();
+        final int adjustedVelocity = this.configuration.isAccentActive () ? this.configuration.getFixedAccentValue () : this.surface.getButton (ButtonID.get (ButtonID.PAD1, index)).getPressedVelocity ();
+
+        if (this.handleSequencerAreaButtonCombinations (cursorClip, editMidiChannel, x, y, mappedNote, adjustedVelocity))
+            return;
+
+        final int state = cursorClip.getStep (editMidiChannel, x, mappedNote).getState ();
 
         if (velocity > 0)
         {
-            // Turn on Note mode if an existing note is pressed
-            final INoteClip cursorClip = this.getClip ();
-            final int mappedNote = this.keyManager.map (y);
-            final int editMidiChannel = this.configuration.getMidiEditChannel ();
-            final int state = cursorClip.getStep (editMidiChannel, x, mappedNote).getState ();
-            if (state == IStepInfo.NOTE_START)
+            if (state == IStepInfo.NOTE_OFF)
             {
-                final NoteMode noteMode = (NoteMode) modeManager.get (Modes.NOTE);
-                noteMode.setValues (cursorClip, editMidiChannel, x, mappedNote);
-                modeManager.setActive (Modes.NOTE);
+                cursorClip.toggleStep(editMidiChannel, x, mappedNote, adjustedVelocity);
+                this.editedSteps[x] = true;
             }
+
+            final NoteMode noteMode = (NoteMode) modeManager.get (Modes.NOTE);
+            noteMode.setValues (cursorClip, editMidiChannel, x, mappedNote);
+            modeManager.setActive (Modes.NOTE);
         }
         else
         {
@@ -69,14 +81,61 @@ public class SequencerView extends AbstractNoteSequencerView<APCControlSurface, 
             if (modeManager.isActive (Modes.NOTE))
                 modeManager.restore ();
 
-            if (this.isNoteEdited)
+            if (this.editedSteps[x])
             {
-                this.isNoteEdited = false;
+                this.editedSteps[x] = false;
                 return;
+            }
+            else if (state == IStepInfo.NOTE_START)
+            {
+                cursorClip.toggleStep(editMidiChannel, x, mappedNote, adjustedVelocity);
+            }
+        }
+    }
+
+
+    public void setStepEdited (final int index)
+    {
+        this.editedSteps[index] = true;
+    }
+
+    
+    /** {@inheritDoc} */
+    private boolean handleSequencerAreaButtonCombinations (final INoteClip clip, final int channel, final int step, final int row, final int note, final int velocity)
+    {
+        // Handle note duplicate function
+        final IHwButton duplicateButton = this.surface.getButton (ButtonID.DUPLICATE);
+        if (duplicateButton != null && duplicateButton.isPressed ())
+        {
+            duplicateButton.setConsumed ();
+            final IStepInfo noteStep = clip.getStep (channel, step, note);
+            if (noteStep.getState () == IStepInfo.NOTE_START)
+                this.copyNote = noteStep;
+            else if (this.copyNote != null)
+                clip.setStep (channel, step, note, this.copyNote);
+            return true;
+        }
+
+        // Change length of a note or create a new one with a length
+        final int offset = row * clip.getNumSteps ();
+        for (int s = 0; s < step; s++)
+        {
+            final IHwButton button = this.surface.getButton (ButtonID.get (ButtonID.PAD1, offset + s));
+            if (button.isPressed ())
+            {
+                // button.setConsumed ();
+                final int length = step - s + 1;
+                final double duration = length * Resolution.getValueAt (this.getResolutionIndex ());
+                final int state = note < 0 ? 0 : clip.getStep (channel, s, note).getState ();
+                if (state == IStepInfo.NOTE_START)
+                    clip.updateStepDuration (channel, s, note, duration);
+                else
+                    clip.setStep (channel, s, note, velocity, duration);
+                return true;
             }
         }
 
-        super.handleSequencerArea (index, x, y, velocity);
+        return false;
     }
 
 
